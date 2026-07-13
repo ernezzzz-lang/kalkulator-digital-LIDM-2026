@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Kedaulatan Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07080a;
+            --primary: #ccff00;
+            --primary-dim: rgba(204, 255, 0, 0.1);
+            --danger: #ff2a5f;
+            --safe: #00ff88;
+            --text-main: #f0f0f5;
+            --text-muted: #8f92a1;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box; /* Mencegah scroll karena animasi background */
+        }
+
+        /* --- ANIMASI BACKGROUND SIBER --- */
+        .bg-grid {
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200vw; height: 200vh;
+            background-image: 
+                linear-gradient(var(--primary-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-dim) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: panGrid 15s linear infinite;
+        }
+
+        @keyframes panGrid {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vw; height: 70vw;
+            background: radial-gradient(circle, rgba(204, 255, 0, 0.05) 0%, transparent 60%);
+            z-index: -1;
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        }
+        /* -------------------------------- */
+
+        /* UI Kartu Kalkulator (Glassmorphism) */
+        .app-container {
+            background: rgba(20, 21, 26, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .input-group { margin-bottom: 25px; }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--border);
+            color: var(--text-main);
+            font-family: 'Space Mono', monospace;
+            font-size: 24px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(204, 255, 0, 0.15);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        .suffix {
+            position: absolute;
+            right: 20px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            background: var(--primary);
+            color: #000000;
+            border: none;
+            padding: 18px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(204, 255, 0, 0.3);
+        }
+
+        .results-wrapper {
+            margin-top: 35px;
+            display: none;
+        }
+
+        .data-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .data-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0; 
+            transform: translateY(15px);
+        }
+
+        .data-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            max-width: 65%;
+        }
+
+        .data-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            text-align: right;
+        }
+
+        .status-banner {
+            padding: 20px;
+            border-radius: 14px;
+            border-left: 4px solid transparent;
+            opacity: 0;
+            transform: translateY(15px);
+            backdrop-filter: blur(5px);
+        }
+
+        .status-banner.terjajah {
+            background: rgba(255, 42, 95, 0.1);
+            border: 1px solid rgba(255, 42, 95, 0.2);
+            border-left: 4px solid var(--danger);
+        }
+
+        .status-banner.berdaulat {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-left: 4px solid var(--safe);
+        }
+
+        .status-title {
+            font-weight: 800;
+            font-size: 15px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .terjajah .status-title { color: var(--danger); }
+        .berdaulat .status-title { color: var(--safe); }
+
+        .status-desc {
+            font-size: 13.5px;
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .highlight { font-weight: 700; color: #ffffff; }
+
+        .animate-pop { animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes popIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="app-container">
+    <div class="header">
+        <h1>Kalkulator Gadget</h1>
+        <p>Lihat seberapa banyak waktumu diserap oleh algoritma.</p>
+    </div>
+
+    <div class="input-group">
+        <label for="screentime">Berapa rata-rata screen time harianmu?</label>
+        <div class="input-wrapper">
+            <input type="number" id="screentime" placeholder="0" min="0" max="24" autocomplete="off">
+            <span class="suffix">Jam</span>
+        </div>
+    </div>
+
+    <button onclick="hitungKedaulatan()">Hitung Dampaknya</button>
+
+    <div id="resultsBox" class="results-wrapper">
+        <div class="data-grid">
+            <div class="data-card" id="card1">
+                <div class="data-label">Waktu yang dirampas layar dalam setahun:</div>
+                <div class="data-value"><span id="jamTahun">0</span><span style="font-size: 12px; color: var(--text-muted);"> Jam</span></div>
+            </div>
+            <div class="data-card" id="card2">
+                <div class="data-label">Itu setara dengan melek tanpa tidur selama:</div>
+                <div class="data-value"><span id="hariTahun">0</span><span style="font-size: 12px; color: var(--text-muted);"> Hari</span></div>
+            </div>
+            <div class="data-card" id="card3">
+                <div class="data-label">Dalam 10 tahun, kamu membuang umur produktif:</div>
+                <div class="data-value"><span id="prediksi10">0</span><span style="font-size: 12px; color: var(--text-muted);"> Tahun</span></div>
+            </div>
+            <div class="data-card" id="card4">
+                <div class="data-label">Padahal waktu itu setara dengan menuntaskan:</div>
+                <div class="data-value"><span id="sesiBelajar">0</span><span style="font-size: 12px; color: var(--text-muted);"> Sesi Belajar</span></div>
+            </div>
+        </div>
+        
+        <div id="statusMasyarakat" class="status-banner"></div>
+    </div>
+</div>
+
+<script>
+function animateValue(id, start, end, duration, isFloat = false) {
+    const obj = document.getElementById(id);
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const easeOut = progress * (2 - progress); 
+        let current = (easeOut * end);
+        
+        if (isFloat) {
+            obj.innerHTML = current.toFixed(1);
+        } else {
+            obj.innerHTML = Math.floor(current).toLocaleString('id-ID');
+        }
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            obj.innerHTML = isFloat ? end.toFixed(1) : Math.floor(end).toLocaleString('id-ID');
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+function hitungKedaulatan() {
+    const inputField = document.getElementById('screentime');
+    const jamHarian = parseFloat(inputField.value);
+    
+    if (isNaN(jamHarian) || jamHarian <= 0 || jamHarian > 24) {
+        inputField.style.borderColor = 'var(--danger)';
+        setTimeout(() => inputField.style.borderColor = 'var(--border)', 1000);
+        return;
+    }
+
+    const jamPerTahun = jamHarian * 365;
+    const hariPerTahun = jamPerTahun / 24;
+    const prediksiSepuluhTahun = (jamHarian * 10) / 24;
+    const sesiHilang = jamPerTahun / 2;
+
+    const resultsBox = document.getElementById('resultsBox');
+    const statusBox = document.getElementById('statusMasyarakat');
+
+    resultsBox.style.display = 'none';
+    
+    const cards = [document.getElementById('card1'), document.getElementById('card2'), document.getElementById('card3'), document.getElementById('card4'), statusBox];
+    cards.forEach(card => {
+        card.classList.remove('animate-pop');
+        card.style.opacity = '0'; 
+    });
+
+    setTimeout(() => {
+        resultsBox.style.display = 'block';
+
+        animateValue('jamTahun', 0, jamPerTahun, 1500, false);
+        animateValue('hariTahun', 0, hariPerTahun, 1500, false);
+        animateValue('prediksi10', 0, prediksiSepuluhTahun, 1500, true); 
+        animateValue('sesiBelajar', 0, sesiHilang, 1500, false);
+
+        if (jamHarian >= 5) {
+            statusBox.className = "status-banner terjajah";
+            statusBox.innerHTML = `
+                <div class="status-title">STATUS: TERJAJAH ALGORITMA</div>
+                <p class="status-desc">Tanpa sadar,  pikiranmu perlahan diambil alih oleh layar (<span class="highlight">Sila 4</span>). Jangan sampai durasi ini bikin kamu terasing dari dunia nyata dan orang-orang di sekitarmu (<span class="highlight">Sila 3</span>). Waktunya ambil kendali kembali.</p>
+            `;
+        } else {
+            statusBox.className = "status-banner berdaulat";
+            statusBox.innerHTML = `
+                <div class="status-title">STATUS: KENDALI DI TANGANMU</div>
+                <p class="status-desc">Keren. Kamu terbukti mampu memimpin pikiranmu sendiri!!! (<span class="highlight">Sila 4</span>). Pertahankan ritme ini supaya waktumu tetap punya dampak buat diri sendiri dan orang lain di dunia nyata (<span class="highlight">Sila 3</span>).</p>
+            `;
+        }
+
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('animate-pop');
+            }, index * 200); 
+        });
+
+    }, 50);
+}
+</script>
+</body>
+</html>
